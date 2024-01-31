@@ -2,6 +2,7 @@ package me.tastycake.user;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 import me.tastycake.user.imple.SchoolAdmin;
 import me.tastycake.user.school.SchoolFloor;
 
@@ -9,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
+@Setter
 @Builder
 public class School {
     private List<SchoolFloor> schoolFloors = new ArrayList<>();

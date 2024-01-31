@@ -5,6 +5,7 @@ import me.tastycake.chatgpt.GPTFunction;
 import me.tastycake.chatgpt.GPTPrompt;
 import me.tastycake.chatgpt.GPTRunnable;
 import me.tastycake.suggestion.Suggestion;
+import me.tastycake.user.imple.Pupil;
 
 public class GPT {
     private GPTAPI gpt = new GPTAPI("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", GPTAPI.Model.gpt_3_5_turbo_0613);
@@ -35,13 +36,14 @@ public class GPT {
             @Override
             public String[] run(String v1, String v2) {
                 try {
-                    String result = Suggestion.generate(Suggestion.Prompt.builder()
-                            .self(prompt.getSelf())
-                            .user2(prompt.getUser2())
-                            .food(v1)
-                            .hobby(v2)
-                            .build());
-                    resultListener.sendSucc(result);
+//                    String result = Suggestion.generate(Suggestion.Prompt.builder()
+//                            .self(prompt.getSelf())
+//                            .user2(prompt.getUser2())
+//                            .food(v1)
+//                            .hobby(v2)
+//                            .build());
+//                    resultListener.sendSucc(result);
+                    resultListener.sendResults(v1, v2, prompt.getSelf(), prompt.getUser2());
                 } catch (Exception e) {
                     resultListener.sendErr(e.getMessage());
                 }
@@ -63,6 +65,7 @@ public class GPT {
     }
 
     public interface ResultListener {
+        void sendResults(String v1, String v2, Pupil v3, Pupil v4);
         void sendSucc(String s);
         void sendErr(String s);
     }

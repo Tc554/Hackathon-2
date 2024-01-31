@@ -2,6 +2,8 @@ package me.tastycake.calendar;
 
 import lombok.Getter;
 import lombok.Setter;
+import me.tastycake.Main;
+import me.tastycake.suggestion.Suggestion;
 import me.tastycake.user.imple.Pupil;
 
 import java.util.*;

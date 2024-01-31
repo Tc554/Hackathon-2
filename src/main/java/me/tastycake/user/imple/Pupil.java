@@ -2,6 +2,7 @@ package me.tastycake.user.imple;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 import me.tastycake.calendar.Activity;
 import me.tastycake.calendar.PupilCalendar;
 import me.tastycake.hobbies.Food;
@@ -16,6 +17,7 @@ import java.util.List;
 
 
 @Getter
+@Setter
 @Builder
 public class Pupil extends User {
     private String name;
@@ -25,6 +27,7 @@ public class Pupil extends User {
     private SchoolClass schoolClass;
     private SchoolFloor schoolFloor;
     private School school;
+    private List<Pupil> skipPupils = new ArrayList<>();
 
     private int points = 0;
 

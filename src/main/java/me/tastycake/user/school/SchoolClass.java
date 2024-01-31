@@ -1,6 +1,7 @@
 package me.tastycake.user.school;
 
 import lombok.Getter;
+import lombok.Setter;
 import me.tastycake.calendar.Activity;
 import me.tastycake.user.imple.Pupil;
 import me.tastycake.user.imple.Teacher;
@@ -9,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
+@Setter
 public class SchoolClass {
     private List<Pupil> pupils = new ArrayList<>();
     private List<Activity> activeActivities = new ArrayList<>();

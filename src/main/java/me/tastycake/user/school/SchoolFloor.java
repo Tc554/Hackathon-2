@@ -1,8 +1,13 @@
 package me.tastycake.user.school;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
+@Setter
 public class SchoolFloor {
     private List<SchoolClass> schoolClasses = new ArrayList<>();
 

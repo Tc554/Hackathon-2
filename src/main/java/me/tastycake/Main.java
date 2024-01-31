@@ -1,5 +1,7 @@
 package me.tastycake;
 
+import me.tastycake.calendar.DateActivity;
+import me.tastycake.calendar.PupilCalendar;
 import me.tastycake.chatgpt.GPTAPI;
 import me.tastycake.chatgpt.GPTFunction;
 import me.tastycake.chatgpt.GPTPrompt;
@@ -8,13 +10,39 @@ import me.tastycake.chatgpt.imple.GPT;
 import me.tastycake.hobbies.Food;
 import me.tastycake.hobbies.Hobby;
 import me.tastycake.suggestion.Suggestion;
+import me.tastycake.user.School;
 import me.tastycake.user.imple.Pupil;
+import me.tastycake.user.imple.Teacher;
+import me.tastycake.user.school.SchoolClass;
+import me.tastycake.user.school.SchoolFloor;
 
 import java.util.ArrayList;
 
 public class Main {
+    public static GPT gpt;
+
     public static void main(String[] args) {
+        // Listener
         GPT.ResultListener resultListener = new GPT.ResultListener() {
+            @Override
+            public void sendResults(String v1, String v2, Pupil v3, Pupil v4) {
+                String v3Suggestion = Suggestion.generate(Suggestion.Prompt.builder()
+                        .self(v3)
+                        .user2(v4)
+                        .food(v1)
+                        .hobby(v2)
+                        .build());
+                String v4Suggestion = Suggestion.generate(Suggestion.Prompt.builder()
+                        .self(v4)
+                        .user2(v3)
+                        .food(v1)
+                        .hobby(v2)
+                        .build());
+
+                System.out.println(v3.getName() + ":   " + v3Suggestion);
+                System.out.println(v4.getName() + ":   " + v4Suggestion);
+            }
+
             @Override
             public void sendSucc(String s) {
                 System.out.println(s);
@@ -26,82 +54,114 @@ public class Main {
             }
         };
 
-        GPT gpt = new GPT(resultListener);
 
-        Pupil user1 = Pupil.builder()
-                .name("User 1")
-
-                .foods(new ArrayList<>() {{
-                    add(new Food("ציפס", true));
-                    add(new Food("פיצה", true));
-                    add(new Food("האמבורגר", true));
-                }})
-                .hobbies(new ArrayList<>() {{
-                    add(new Hobby("כדורגל", true));
-                    add(new Hobby("שחמט", true));
-                    add(new Hobby("פורטנייט", false));
-                }})
+        // School Setup
+        School school = School.builder()
+                .pointsPerActivity(5)
+                .defTimeToFinishActivity(7)
                 .build();
 
-        Pupil user2 = Pupil.builder()
-                .name("User 2")
+        SchoolClass schoolClass = new SchoolClass();
+        SchoolFloor schoolFloor = new SchoolFloor();
+        schoolFloor.getSchoolClasses().add(schoolClass);
 
-                .foods(new ArrayList<>() {{
-                    add(new Food("פסטה", true));
-                    add(new Food("פיצה", false));
-                    add(new Food("האמבורגר", true));
-                }})
-                .hobbies(new ArrayList<>() {{
-                    add(new Hobby("מיינקראפט", true));
-                    add(new Hobby("שחמט", true));
-                    add(new Hobby("פורטנייט", true));
-                }})
+        gpt = new GPT(resultListener);
+
+        Teacher teacher = Teacher.builder()
+                .schoolClass(schoolClass)
+                .schoolFloor(schoolFloor)
+                .school(school)
                 .build();
 
-        Suggestion.Prompt prompt = Suggestion.Prompt.builder()
-                .self(user1)
-                .user2(user2)
-                .build();
+        schoolClass.setTeacher(teacher);
 
-        // gptTest(prompt, user1, user2);
 
-        gpt.send(prompt);
+        // Pupils
+        if (true) {
+            Pupil user1 = Pupil.builder()
+                    .name("עמית")
+                    .school(school)
+                    .schoolClass(schoolClass)
+                    .schoolFloor(schoolFloor)
+
+                    .foods(new ArrayList<>() {{
+                        add(new Food("ציפס", true));
+                        add(new Food("פיצה", true));
+                        add(new Food("האמבורגר", true));
+                    }})
+                    .hobbies(new ArrayList<>() {{
+                        add(new Hobby("כדורגל", true));
+                        add(new Hobby("שחמט", true));
+                        add(new Hobby("פורטנייט", false));
+                    }})
+                    .build();
+            user1.setPupilCalender(new PupilCalendar(user1));
+
+            Pupil user2 = Pupil.builder()
+                    .name("יוסי")
+                    .school(school)
+                    .schoolClass(schoolClass)
+                    .schoolFloor(schoolFloor)
+
+                    .foods(new ArrayList<>() {{
+                        add(new Food("פסטה", true));
+                        add(new Food("פיצה", false));
+                        add(new Food("האמבורגר", true));
+                    }})
+                    .hobbies(new ArrayList<>() {{
+                        add(new Hobby("מיינקראפט", true));
+                        add(new Hobby("שחמט", true));
+                        add(new Hobby("פורטנייט", true));
+                    }})
+                    .build();
+            user2.setPupilCalender(new PupilCalendar(user2));
+
+            Pupil user3 = Pupil.builder()
+                    .name("משה")
+                    .school(school)
+                    .schoolClass(schoolClass)
+                    .schoolFloor(schoolFloor)
+
+                    .foods(new ArrayList<>() {{
+                        add(new Food("פסטה", false));
+                        add(new Food("פיצה", false));
+                        add(new Food("האמבורגר", true));
+                    }})
+                    .hobbies(new ArrayList<>() {{
+                        add(new Hobby("מיינקראפט", true));
+                        add(new Hobby("שחמט", true));
+                        add(new Hobby("פורטנייט", false));
+                    }})
+                    .build();
+            user3.setPupilCalender(new PupilCalendar(user3));
+
+            Pupil user4 = Pupil.builder()
+                    .name("רועי")
+                    .school(school)
+                    .schoolClass(schoolClass)
+                    .schoolFloor(schoolFloor)
+
+                    .foods(new ArrayList<>() {{
+                        add(new Food("פסטה", false));
+                        add(new Food("פיצה", true));
+                        add(new Food("האמבורגר", false));
+                    }})
+                    .hobbies(new ArrayList<>() {{
+                        add(new Hobby("מיינקראפט", true));
+                        add(new Hobby("שחמט", false));
+                        add(new Hobby("פורטנייט", true));
+                    }})
+                    .build();
+            user4.setPupilCalender(new PupilCalendar(user4));
+
+            schoolClass.setPupils(new ArrayList<>() {{
+                add(user1);
+                add(user2);
+                add(user3);
+                add(user4);
+            }});
+        }
+
+        DateActivity.pick(schoolClass);
     }
-
-//    public static String gptTest(String prompt, Pupil user1, Pupil user2) {
-//        String en = "You are here to help 2 people choose what to eat and what hobby to do, Each person will tell you what he likes to eat and what are his hobbies and what they hate to eat and what are his hated hobbies then you need to call the function choose with the food both of them most likely would like and the hobby they most likely would like to do together";
-//        String he = "אתה כאן בשביל לעזור ל 2 אנשים לבחור מה לאכול ואיזה תחביב לעשות, כל איש יגיד לך מה הוא אוהב לאכול ומה התחביבים שלו ומה הוא לא אוהב לאכול ואיזה תחביבים הוא לא אוהב ואז אתה תבחר את המאכל ששניהם אוהבים לאכול ואת התחביב ששניהם אוהבים, תענה הכל בעברית";
-//
-//        GPTPrompt[] prompts = new GPTPrompt[]{new GPTPrompt(GPTPrompt.PromptType.system, he),
-//                // new GPTPrompt(GPTPrompt.PromptType.user,"User 1 likes to eat Pizza and pasta and loves to play soccer, basketball and chess, User2 likes Hamburger and chips but hate pasta and loves to play chess and fortnite but hates soccer")
-//                new GPTPrompt(GPTPrompt.PromptType.user, prompt)
-//        };
-//
-//        gpt.setT(0);
-//
-//        String output = gpt.sendFunction(prompts, new GPTFunction[]{new GPTFunction("choose", new GPTRunnable() {
-//            @Override
-//            public String[] run(String parms) {
-//                System.out.println("They should eat " + parms + " together");
-//                return new String[] {parms};
-//            }
-//
-//            @Override
-//            public String[] run(String v1, String v2) {
-//                System.out.println(Suggestion.generate(Suggestion.Prompt.builder()
-//                        .self(user1)
-//                        .user2(user2)
-//                        .food(v1)
-//                        .hobby(v2)
-//                        .build()));
-//                return new String[] {v1, v2};
-//            }
-//        }, "איזה אוכל ותחביב הם שניהם אוהבים", "food type", "hobby type", "המאכל ששניהם אוהבים והתחביב שהם אוהבים")});
-//                // ,"Lets us know what food and hobby to pick","food type", "hobby type","should be the food they should eat and the hobby they should do together")});
-//
-////        System.out.println("GPT RESPONSE:");
-////        System.out.println(output.replace("\\n","\n"));
-//
-//        return output;
-//    }
 }
