@@ -18,6 +18,10 @@ public class PupilCalendar {
         this.pupil = pupil;
     }
 
+    public void createDateActivity(Pupil u2) {
+        dateActivities.add(DateActivity.createDateActivity(pupil, u2));
+    }
+
     public void requestDate(Date requestedDate) {
         this.requestedDate = requestedDate;
     }
@@ -26,7 +30,9 @@ public class PupilCalendar {
         pupil.getPupilCalender().requestDate(date);
     }
 
-    public Activity acceptDate(Pupil pupil) {
+    public Activity acceptDate(Pupil pupil, DateActivity dateActivity) {
+        dateActivities.remove(dateActivity);
+        pupil.getPupilCalender().getDateActivities().remove(dateActivity);
         Activity activity = new Activity(requestedDate, this.pupil, pupil);
         activities.add(activity);
         pupil.getPupilCalender().getActivities().add(activity);
