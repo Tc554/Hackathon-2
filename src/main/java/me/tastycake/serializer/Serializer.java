@@ -2,6 +2,7 @@ package me.tastycake.serializer;
 
 import me.tastycake.Main;
 import me.tastycake.json.OrderedJSONObject;
+import me.tastycake.user.imple.Pupil;
 import me.tastycake.utils.SortedMap;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -86,6 +87,16 @@ public class Serializer {
         return main;
     }
 
+    public static Serializable deserialize(Serializable serializable) throws Exception {
+        return deserialize("id", serializable.data.getData().get(serializable).getId(), serializable.getClass());
+    }
+
+    public static Serializable deserialize(String primary, String primaryId, Class<?> clazz) throws Exception {
+        JSONObject jsonObject = Main.mySQL.getJSON(primary, primaryId, clazz);
+
+        return deserialize(jsonObject);
+    }
+
     public static Serializable deserialize(JSONObject json) throws Exception {
         JSONObject value = json;
 
@@ -115,17 +126,16 @@ public class Serializer {
 
             for (Object type : types) {
                 if (type instanceof String) {
-                    s:
                     switch ((String) type) {
                         case "int":
                             classes.add(int.class);
-                            break s;
+                            break;
                         case "char":
                             classes.add(char.class);
-                            break s;
+                            break;
                         default:
-                            classes.add(Class.forName((String) type));
-                            break s;
+                            classes.add(Class.forName(((String) type)));
+                            break;
                     }
                 }
             }
@@ -136,6 +146,7 @@ public class Serializer {
         }
 
         for (String s : data.getKeys()) {
+            System.out.println(s);
             if (s.equalsIgnoreCase("params")) continue;
 
             Object obj = data.get(s);

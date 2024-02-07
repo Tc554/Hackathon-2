@@ -2,6 +2,7 @@ package me.tastycake.mysql;
 
 import com.mysql.cj.MysqlType;
 import lombok.Getter;
+import me.tastycake.json.OrderedJSONObject;
 import me.tastycake.serializer.Serializable;
 import me.tastycake.serializer.Serializer;
 import me.tastycake.user.imple.Pupil;
@@ -277,6 +278,96 @@ public class MySQL {
             resultSet.close();
 
             return Serializer.deserialize(main);
+        } catch (Exception e) {
+            handleError(e);
+        }
+
+        return null;
+    }
+
+    public JSONObject getJSON(String primary, String primaryId, Class<?> c) {
+        String sql = "SELECT * FROM user_data WHERE " + primary + " = '" + primaryId + "'";
+        System.out.println(sql);
+
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(sql);
+
+            OrderedJSONObject main = new OrderedJSONObject(new JSONObject());
+
+            OrderedJSONObject data = new OrderedJSONObject(new JSONObject());
+
+            Field[] fields = c.getDeclaredFields();
+
+            List<String> params = new ArrayList<>();
+
+            for (Field field : fields) {
+                field.setAccessible(true);
+
+                params.add(field.getType().getName());
+            }
+
+            data.put("params", new JSONArray(params));
+
+            ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
+
+            String id = "";
+
+            if (resultSet.next()) {
+                for (int i = 1; i < resultSetMetaData.getColumnCount(); i++) {
+                    Object obj = resultSet.getObject(i);
+
+                    if (resultSetMetaData.getColumnName(i).equalsIgnoreCase("id")) {
+                        id = resultSet.getString("id");
+
+                        i++;
+                        continue;
+                    } else {
+                        if (id.equalsIgnoreCase("")) {
+                            if (resultSet.getString("id") != null) id = resultSet.getString("id");
+                        }
+                    }
+
+                    try {
+                        int parsed = Integer.parseInt(obj + "");
+                        data.put(resultSetMetaData.getColumnName(i), parsed);
+
+                        i++;
+                        continue;
+                    } catch (Exception ignore) {
+                    }
+
+                    data.put(resultSetMetaData.getColumnName(i), obj);
+                }
+            }
+
+            statement.close();
+            resultSet.close();
+
+            main.put(c.getName() + "=" + id, data);
+
+            System.out.println(main);
+
+            return main;
+        } catch (Exception e) {
+            handleError(e);
+        }
+
+        return null;
+    }
+
+    public JSONObject getJSONByKey(String primary, String primaryId, String key) {
+        String sql = "SELECT " + key + " FROM user_data WHERE " + primary + " = " + primaryId;
+
+        try {
+           Statement statement = connection.createStatement();
+           ResultSet resultSet = statement.executeQuery(sql);
+
+            statement.close();
+
+           if (resultSet.next()) {
+               return new JSONObject(resultSet.getString(0));
+           }
         } catch (Exception e) {
             handleError(e);
         }
