@@ -1,7 +1,9 @@
 package me.tastycake.suggestion;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import me.tastycake.hobbies.Food;
 import me.tastycake.hobbies.Hobby;
 import me.tastycake.user.imple.Pupil;

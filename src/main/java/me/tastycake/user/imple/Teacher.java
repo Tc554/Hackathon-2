@@ -1,11 +1,11 @@
 package me.tastycake.user.imple;
 
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import me.tastycake.calendar.Activity;
 import me.tastycake.calendar.Upload;
 import me.tastycake.user.School;
-import me.tastycake.user.User;
 import me.tastycake.user.school.SchoolClass;
 import me.tastycake.user.school.SchoolFloor;
 
@@ -13,8 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-@Builder
-public class Teacher extends User {
+@AllArgsConstructor
+@NoArgsConstructor
+public class Teacher {
     private School school;
     private SchoolFloor schoolFloor;
     private SchoolClass schoolClass;

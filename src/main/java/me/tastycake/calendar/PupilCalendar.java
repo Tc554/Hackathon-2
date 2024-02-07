@@ -2,15 +2,15 @@ package me.tastycake.calendar;
 
 import lombok.Getter;
 import lombok.Setter;
-import me.tastycake.Main;
-import me.tastycake.suggestion.Suggestion;
+import me.tastycake.serializer.Serializable;
 import me.tastycake.user.imple.Pupil;
+import me.tastycake.utils.SortedMap;
 
 import java.util.*;
 
 @Getter
 @Setter
-public class PupilCalendar {
+public class PupilCalendar implements Serializable {
     private Date requestedDate;
     private List<Activity> activities = new ArrayList<>();
     private Pupil pupil;
@@ -29,17 +29,27 @@ public class PupilCalendar {
     }
 
     public void askForADate(Date date, Pupil pupil) {
-        pupil.getPupilCalender().requestDate(date);
+        pupil.getPupilCalendar().requestDate(date);
     }
 
     public Activity acceptDate(Pupil pupil, DateActivity dateActivity) {
         dateActivities.remove(dateActivity);
-        pupil.getPupilCalender().getDateActivities().remove(dateActivity);
+        pupil.getPupilCalendar().getDateActivities().remove(dateActivity);
         Activity activity = new Activity(requestedDate, this.pupil, pupil);
         activities.add(activity);
-        pupil.getPupilCalender().getActivities().add(activity);
+        pupil.getPupilCalendar().getActivities().add(activity);
         requestedDate = null;
 
         return activity;
+    }
+
+    @Override
+    public SortedMap serialize() {
+        return new SortedMap() {{
+            put("requestedDate", requestedDate);
+            put("activities", activities);
+            put("pupil", pupil);
+            put("dateActivities", dateActivities);
+        }};
     }
 }

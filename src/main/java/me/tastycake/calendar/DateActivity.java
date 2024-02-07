@@ -42,8 +42,8 @@ public class DateActivity {
                             .self(current)
                             .user2(pupil)
                             .build());
-                    current.getPupilCalender().createDateActivity(pupil);
-                    pupil.getPupilCalender().createDateActivity(current);
+                    current.getPupilCalendar().createDateActivity(pupil);
+                    pupil.getPupilCalendar().createDateActivity(current);
                     pickedPupils.add(pupil);
                     pickedPupils.add(current);
                     current = null;

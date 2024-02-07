@@ -1,23 +1,31 @@
 package me.tastycake.user;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import me.tastycake.serializer.Serializable;
 import me.tastycake.user.imple.SchoolAdmin;
 import me.tastycake.user.school.SchoolFloor;
+import me.tastycake.utils.SortedMap;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 @Setter
-@Builder
-public class School {
+@NoArgsConstructor
+@AllArgsConstructor
+public class School implements Serializable {
     private List<SchoolFloor> schoolFloors = new ArrayList<>();
     private SchoolAdmin schoolAdmin;
-    private int defTimeToFinishActivity = 7;
 
+    @NonNull
+    private int defTimeToFinishActivity = 7;
+    @NonNull
     private int pointsPerActivity = 5;
+
+    public School(int defTimeToFinishActivity, int pointsPerActivity) {
+        this.defTimeToFinishActivity = defTimeToFinishActivity;
+        this.pointsPerActivity = pointsPerActivity;
+    }
 
     public int getTotalPoint() {
         int totalPoints = 0;
@@ -27,5 +35,10 @@ public class School {
         }
 
         return totalPoints;
+    }
+
+    @Override
+    public SortedMap serialize() {
+        return SortedMap.autoCreate(this);
     }
 }
