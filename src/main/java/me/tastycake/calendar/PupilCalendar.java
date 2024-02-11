@@ -51,6 +51,7 @@ public class PupilCalendar implements Serializable {
             put("table", "pupilCalendar");
             put("primaryId", "pupilName");
             put("id", pupil.getName());
+            put("activities", activities);
         }};
     }
 }

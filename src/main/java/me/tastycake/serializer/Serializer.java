@@ -1,5 +1,6 @@
 package me.tastycake.serializer;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import me.tastycake.Main;
 import me.tastycake.json.OrderedJSONObject;
 import me.tastycake.user.imple.Pupil;
@@ -32,6 +33,10 @@ public class Serializer {
 
         if (!mainConfig.exists()) mainConfig.createNewFile();
         if (!serializablesConfig.exists()) serializablesConfig.createNewFile();
+    }
+
+    public static String test(Serializable serializable) throws Exception {
+        return new ObjectMapper().writeValueAsString(serializable);
     }
 
     public static JSONObject serialize(Serializable serializable) {
@@ -87,10 +92,13 @@ public class Serializer {
                 continue;
             }
 
+            System.out.println("FADFADFfsd       " + result.get(s));
+
             data.put(s, result.get(s));
         }
 
         JSONObject main = new JSONObject();
+        System.out.println(serializable.getClass().getName());
         main.put(serializable.getClass().getName() + "=" + id, data);
         return main;
     }

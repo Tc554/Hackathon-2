@@ -5,9 +5,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import me.tastycake.calendar.Activity;
 import me.tastycake.calendar.Upload;
+import me.tastycake.serializer.Serializable;
 import me.tastycake.user.School;
 import me.tastycake.user.school.SchoolClass;
 import me.tastycake.user.school.SchoolFloor;
+import me.tastycake.utils.SortedMap;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +17,7 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Teacher {
+public class Teacher implements Serializable {
     private School school;
     private SchoolFloor schoolFloor;
     private SchoolClass schoolClass;
@@ -35,5 +37,15 @@ public class Teacher {
         }
 
         schoolClass.acceptActivity(activity);
+    }
+
+    @Override
+    public SortedMap serialize() {
+        return new SortedMap() {{
+            put("school", school);
+            put("schoolFloor", schoolFloor);
+            put("schoolClass", schoolClass);
+            put("uploads", uploads);
+        }};
     }
 }

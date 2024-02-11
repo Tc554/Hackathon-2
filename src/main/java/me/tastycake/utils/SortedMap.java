@@ -59,12 +59,8 @@ public class SortedMap {
             // Collections.addAll(types, c.getParameterTypes().getClass().getSimpleName().toLowerCase());
         }
 
-        if (serializable instanceof Hobby) System.out.println("t: " + types);
-
         for (Field field : fields) {
             field.setAccessible(true);
-
-            if (serializable instanceof Hobby) System.out.println("f: " + field.getName());
 
             if (!types.contains(field.getName().toLowerCase())) continue;
 

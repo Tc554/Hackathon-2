@@ -92,14 +92,22 @@ public class Main {
 
         String id = UUID.randomUUID().toString();
 
-        // JSONObject main = Serializer.serializeAndSave("mail", user1.getMail(), "",  user1);
+//        JSONObject main = Serializer.serializeAndSave("mail", user1.getMail(), "",  user1);
+//
+//        System.out.println(main);
 
         try {
-            Pupil deserialized = (Pupil) Serializer.deserialize("mail", user1.getMail(), Pupil.class);
-            System.out.println(deserialized);
+            System.out.println(Serializer.test(user1));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+
+//        try {
+//            Pupil deserialized = (Pupil) Serializer.deserialize("mail", user1.getMail(), Pupil.class);
+//            System.out.println(deserialized);
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
     }
 
     public void setupSchool() {
