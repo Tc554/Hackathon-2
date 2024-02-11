@@ -1,6 +1,8 @@
 package me.tastycake.utils;
 
 import lombok.Getter;
+import lombok.ToString;
+import me.tastycake.hobbies.Hobby;
 import me.tastycake.serializer.Serializable;
 
 import java.lang.reflect.Constructor;
@@ -11,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Getter
+@ToString
 public class SortedMap {
     private final List<String> keys = new ArrayList<>();
     private final List<Object> values = new ArrayList<>();
@@ -32,6 +35,16 @@ public class SortedMap {
         return values.get(i);
     }
 
+    public boolean containsKey(String key) {
+        return keys.contains(key);
+    }
+
+    public boolean containsValue(String value) {
+        return values.contains(value);
+    }
+
+
+    // Doesn't work correctly as for rn -> TODO: fix
     public static SortedMap autoCreate(Serializable serializable) {
         SortedMap sortedMap = new SortedMap();
 
@@ -40,13 +53,18 @@ public class SortedMap {
         List<String> types = new ArrayList<>();
 
         for (Constructor c : serializable.getClass().getConstructors()) {
-            if (c.getParameterTypes().length > 0) {
-                Collections.addAll(types, c.getParameterTypes().getClass().getSimpleName().toLowerCase());
+            for (Class<?> parameterType : c.getParameterTypes()) {
+                types.add(parameterType.getSimpleName().toLowerCase());
             }
+            // Collections.addAll(types, c.getParameterTypes().getClass().getSimpleName().toLowerCase());
         }
+
+        if (serializable instanceof Hobby) System.out.println("t: " + types);
 
         for (Field field : fields) {
             field.setAccessible(true);
+
+            if (serializable instanceof Hobby) System.out.println("f: " + field.getName());
 
             if (!types.contains(field.getName().toLowerCase())) continue;
 

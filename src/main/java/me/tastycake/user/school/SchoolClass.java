@@ -1,6 +1,8 @@
 package me.tastycake.user.school;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import me.tastycake.calendar.Activity;
 import me.tastycake.serializer.Serializable;
@@ -13,6 +15,8 @@ import java.util.List;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class SchoolClass implements Serializable {
     private List<Pupil> pupils = new ArrayList<>();
     private List<Activity> activeActivities = new ArrayList<>();
@@ -42,6 +46,10 @@ public class SchoolClass implements Serializable {
 
     @Override
     public SortedMap serialize() {
-        return SortedMap.autoCreate(this);
+        return new SortedMap() {{
+           put("pupils", pupils);
+           put("activeActivities", activeActivities);
+           put("teacher", teacher);
+        }};
     }
 }

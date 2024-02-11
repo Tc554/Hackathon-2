@@ -44,6 +44,17 @@ public class Pupil implements Serializable {
 
     @Override
     public SortedMap serialize() {
-        return SortedMap.autoCreate(this);
+        return new SortedMap() {{
+           put("name", name);
+           put("mail", mail);
+           put("hobbies", hobbies);
+           put("foods", foods);
+           put("pupilCalendar", pupilCalendar);
+           put("schoolClass", schoolClass);
+           put("schoolFloor", schoolFloor);
+           put("school", school);
+           put("skipPupils", skipPupils);
+           put("points", points);
+        }};
     }
 }

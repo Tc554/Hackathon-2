@@ -32,36 +32,52 @@ public class MySQL {
         return DriverManager.getConnection(url, username, password);
     }
 
-    public void saveToKey(String primaryId, String key, JSONObject jsonObject, Serializable... serializables) {
+    public void saveToKey(String primaryId, String id, String key, JSONObject jsonObject, Serializable... serializables) {
         try {
-            if (keyExists(primaryId, key)) {
-                updateKey(primaryId, key, jsonObject);
+            if (keyExists(primaryId, id)) {
+                Field[] fields = serializables.getClass().getDeclaredFields();
+
+                if (key.equalsIgnoreCase("")) {
+                    for (Field field : fields) {
+                        field.setAccessible(true);
+                        String name = field.getName();
+                        updateKey(primaryId, id, name, jsonObject);
+                    }
+                } else {
+                    updateKey(primaryId, id, key, jsonObject);
+                }
             } else if (serializables.length > 0) {
-                insertKey(primaryId, key, serializables[0]);
+                insertKey(primaryId, id, serializables[0]);
             }
         } catch (Exception e) {
             handleError(e);
         }
     }
 
-    private boolean keyExists(String primaryId, String key) throws SQLException {
-        String sql = "SELECT * FROM user_data WHERE id = ?";
+    private boolean keyExists(String primaryId, String id) throws SQLException {
+        String sql = "SELECT * FROM user_data WHERE " + primaryId + " = ?";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, primaryId);
-            return statement.executeQuery().next();
+            statement.setString(1, id);
+
+            boolean result = statement.executeQuery().next();
+            statement.close();
+            return result;
         }
     }
 
-    private void updateKey(String primaryId, String key, JSONObject jsonObject) throws SQLException {
-        String sql = "UPDATE user_data SET " + key + " = ? WHERE id = ?";
+    private void updateKey(String primaryId, String id, String key, JSONObject jsonObject) throws SQLException {
+        String sql = "UPDATE user_data SET ? = ? WHERE ? = ?";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, jsonObject.toString());
-            statement.setString(2, primaryId);
+            statement.setString(1, key);
+            statement.setString(2, jsonObject.toString());
+            statement.setString(3, primaryId);
+            statement.setString(4, id);
+
             statement.executeUpdate();
         }
     }
 
-    private void insertKey(String primaryId, String key, Serializable object) throws SQLException {
+    private void insertKey(String primaryId, String id, Serializable object) throws SQLException {
         Class<? extends Serializable> clazz = object.getClass();
 
         Constructor<?>[] constructors = clazz.getDeclaredConstructors();
@@ -97,16 +113,14 @@ public class MySQL {
                 }
             }
 
-            insertValue(primaryId, values.toArray(), fieldNames.toArray(new String[fieldNames.size()]));
+            insertValue(primaryId, id, values.toArray(), fieldNames.toArray(new String[fieldNames.size()]));
         } catch (Exception e) {
             handleError(e);
         }
     }
 
-    private void insertValue(String primaryId, Object[] values, String... fields) throws Exception {
+    private void insertValue(String primaryId, String id, Object[] values, String... fields) throws Exception {
         StringBuilder sql = new StringBuilder("INSERT INTO user_data(id, ");
-
-        System.out.println(fields.length + "       " + values.length);
 
         int i = 0;
         for (String field : fields) {
@@ -122,6 +136,14 @@ public class MySQL {
 
         sql.append(") VALUES (?, ");
 
+        int idIndex = 0;
+
+        for (String field : fields) {
+            if (field.equalsIgnoreCase(id)) break;
+
+            idIndex++;
+        }
+
         i = 0;
         for (Object value : values) {
             if (!(value instanceof Integer)) sql.append("'");
@@ -135,13 +157,13 @@ public class MySQL {
 
                 JSONArray n = new JSONArray();
 
-                String id = UUID.randomUUID().toString();
+                String d = UUID.randomUUID().toString();
 
                 String className = "";
 
                 for (Object o : (List<?>) value) {
                     if (o instanceof Serializable) {
-                        n.put(Serializer.serialize(primaryId, "", (Serializable) o));
+                        n.put(Serializer.serialize((Serializable) o));
                         className = ArrayList.class.getName();
                     } else {
                         n.put(o + "");
@@ -149,12 +171,15 @@ public class MySQL {
                 }
 
                 if (className.equalsIgnoreCase("")) className = value.getClass().getName();
-                main.put(className + "=" + id, n);
+                main.put(className + "=" + d, n);
+
+                // System.out.println(main);
 
                 sql.append(main);
             }
             else if (value instanceof Serializable) {
-                sql.append(Serializer.serialize(primaryId, "", (Serializable) value));
+                JSONObject jsonObject;
+                sql.append(jsonObject = Serializer.serialize((Serializable) value));
             } else {
                 sql.append(value + "");
             }
@@ -168,13 +193,10 @@ public class MySQL {
             i++;
         }
 
-        System.out.println(i);
-
         sql.append(")");
 
         try (PreparedStatement statement = connection.prepareStatement(sql.toString())) {
-            statement.setString(1, primaryId);
-            System.out.println(statement.toString());
+            statement.setString(1, UUID.randomUUID().toString());
             statement.executeUpdate();
         }
     }
@@ -182,7 +204,7 @@ public class MySQL {
     public Serializable getByMail(String mail) {
         try {
             Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT * FROM user_data WHERE mail = " + mail);
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM user_data WHERE mail = '" + mail + "'");
 
             List<ResultObject> values = new ArrayList<>();
 
@@ -287,7 +309,6 @@ public class MySQL {
 
     public JSONObject getJSON(String primary, String primaryId, Class<?> c) {
         String sql = "SELECT * FROM user_data WHERE " + primary + " = '" + primaryId + "'";
-        System.out.println(sql);
 
         try {
             Statement statement = connection.createStatement();
@@ -345,8 +366,6 @@ public class MySQL {
             resultSet.close();
 
             main.put(c.getName() + "=" + id, data);
-
-            System.out.println(main);
 
             return main;
         } catch (Exception e) {

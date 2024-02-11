@@ -34,12 +34,13 @@ public class Serializer {
         if (!serializablesConfig.exists()) serializablesConfig.createNewFile();
     }
 
-    public static JSONObject serialize(String primaryId, String key, Serializable serializable) {
+    public static JSONObject serialize(Serializable serializable) {
         if (serializable.data.getData().get(serializable) == null) {
             Serializable.Data data = new Serializable.Data();
             data.setId(UUID.randomUUID().toString());
             serializable.data.getData().put(serializable, data);
         }
+
         String id = serializable.data.getData().get(serializable).getId();
 
         OrderedJSONObject data = new OrderedJSONObject(new JSONObject());
@@ -73,6 +74,19 @@ public class Serializer {
                 continue;
             }
 
+            if (result.get(s) instanceof Serializable se) {
+                SortedMap serialized;
+
+                if ((serialized = se.serialize()).containsKey("table")) {
+                    String sql = "SELECT * FROM table WHERE " + serialized.get("primaryId") + " = '" + serialized.get("id") + "'";
+                    data.put(s, sql);
+                    continue;
+                }
+
+                data.put(s, serialize(se));
+                continue;
+            }
+
             data.put(s, result.get(s));
         }
 
@@ -81,9 +95,9 @@ public class Serializer {
         return main;
     }
 
-    public static JSONObject serializeAndSave(String primaryId, String key, Serializable serializable) {
-        JSONObject main = serialize(primaryId, key, serializable);
-        Main.mySQL.saveToKey(primaryId, key, main, serializable);
+    public static JSONObject serializeAndSave(String primaryId, String id, String key, Serializable serializable) {
+        JSONObject main = serialize(serializable);
+        Main.mySQL.saveToKey(primaryId, id, key, main, serializable);
         return main;
     }
 
@@ -98,9 +112,112 @@ public class Serializer {
     }
 
     public static Serializable deserialize(JSONObject json) throws Exception {
-        JSONObject value = json;
+        String next = "";
 
-        int index = 0;
+        if (json.keys().hasNext()) {
+            next = json.keys().next();
+        } else {
+            return null;
+        }
+
+        // OrderedJSONObject data = new OrderedJSONObject(json.getJSONObject(next));
+
+        OrderedJSONObject data = (OrderedJSONObject) json.getJSONObject(next);
+
+        StringTokenizer tokenizer = new StringTokenizer(next, "=");
+
+        String className = "";
+        String id = "";
+
+        try {
+            className = tokenizer.nextToken();
+            id = tokenizer.nextToken();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        JSONArray params = data.getJSONArray("params");
+
+        boolean found = false;
+        for (Class<?> i : Class.forName(className).getInterfaces()) {
+            if (i.getName().equalsIgnoreCase(Serializable.class.getName())) {
+                found = true;
+                break;
+            }
+        }
+
+        List<Class<?>> classes = new ArrayList<>();
+
+        Constructor constructor;
+
+        if (found) {
+            params.forEach((param) -> {
+                if (param instanceof String) {
+                    switch ((String) param) {
+                        case "int":
+                            classes.add(int.class);
+                            break;
+                        case "char":
+                            classes.add(char.class);
+                            break;
+                        default:
+                            try {
+                                classes.add(Class.forName(((String) param)));
+                            } catch (ClassNotFoundException e) {
+                                e.printStackTrace();
+                                break;
+                            }
+                            break;
+                    }
+                } else if (param instanceof Integer) {
+                    classes.add(int.class);
+                }
+            });
+        }
+
+        constructor = Class.forName(className).getConstructor(classes.toArray(new Class<?>[classes.size()]));
+
+        List<Object> values = new ArrayList<>();
+
+        for (String key : data.getKeys()) {
+            System.out.println("Key: " + key);
+            if (key.equalsIgnoreCase("params")) continue;
+
+            try {
+                JSONArray value = data.getJSONArray(key);
+                values.add(value.toList());
+                continue;
+            } catch (Exception ignore) {
+                ignore.printStackTrace();
+            }
+
+            try {
+                JSONObject value = data.getJSONObject(key);
+                Serializable deserialized = Serializer.deserialize(value);
+                values.add(deserialized);
+                continue;
+            } catch (Exception ignore) {
+                ignore.printStackTrace();
+            }
+
+            values.add(data.get(key));
+        }
+
+        for (int i = 0; i < classes.size(); i++) {
+            System.out.println(classes.get(i) + ": " + values.get(i));
+        }
+
+        Serializable serializable = (Serializable) constructor.newInstance(values.toArray());
+        Serializable.Data d = new Serializable.Data();
+        d.setId(id);
+        serializable.data.getData().put(serializable, d);
+
+        return serializable;
+    }
+
+    /* public static Serializable deserialize(JSONObject json) throws Exception {
+        JSONObject value = new JSONObject(json.toString());
 
         Serializable serializable;
 
@@ -108,20 +225,52 @@ public class Serializer {
         Constructor constructor = null;
         String id = "";
 
-        String next = value.keys().next();
+        if (!value.keys().hasNext()) {
+            return null;
+        }
 
-        OrderedJSONObject data = (OrderedJSONObject) value.getJSONObject(next);
+        String next = "";
+
+        try {
+            next = value.keys().next();
+        } catch (Exception ignore) {
+            ignore.printStackTrace();
+            return null;
+        }
+
+        OrderedJSONObject data = null;
+
+        try {
+            data = (OrderedJSONObject) value.getJSONObject(next);
+        } catch (Exception e) {
+            try {
+                data = new OrderedJSONObject(value.getJSONObject(next));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                return null;
+            }
+        }
 
         StringTokenizer tokenizer = new StringTokenizer(next, "=");
 
-        JSONArray params = value.getJSONObject(next).getJSONArray("params");
+        JSONArray params = data.getJSONArray("params");
 
         String clazz = tokenizer.nextToken();
         id = tokenizer.nextToken();
 
         List<Class<?>> classes = new ArrayList<>();
 
-        if (Class.forName(clazz).newInstance() instanceof Serializable) {
+        Class<?> asClass = Class.forName(clazz);
+
+        boolean found = false;
+        for (Class<?> i : asClass.getInterfaces()) {
+            if (i.getName().equalsIgnoreCase(Serializable.class.getName())) {
+                found = true;
+                break;
+            }
+        }
+
+        if (found) {
             List<Object> types = params.toList();
 
             for (Object type : types) {
@@ -137,6 +286,8 @@ public class Serializer {
                             classes.add(Class.forName(((String) type)));
                             break;
                     }
+                } else if (type instanceof Integer) {
+                    classes.add(int.class);
                 }
             }
 
@@ -146,28 +297,99 @@ public class Serializer {
         }
 
         for (String s : data.getKeys()) {
-            System.out.println(s);
             if (s.equalsIgnoreCase("params")) continue;
 
             Object obj = data.get(s);
 
-            if (obj instanceof JSONArray) {
-                values.add(((JSONArray) obj).toList());
+            try {
+                OrderedJSONObject orderedJSONObject = new OrderedJSONObject(new JSONObject(obj + ""));
+                values.add(orderedJSONObject);
                 continue;
+            } catch (Exception ignore) {
+
             }
 
             values.add(obj);
         }
 
+
         if (constructor == null) return null;
 
-        serializable = (Serializable) constructor.newInstance(values.toArray());
+        List<Object> deserialized = new ArrayList<>();
+
+        for (Object v : values) {
+            if (v instanceof Integer) {
+                deserialized.add(v);
+                continue;
+            }
+
+            if (v instanceof JSONArray) {
+                List<Object> toList = ((JSONArray) v).toList();
+
+                List<Object> fixed = new ArrayList<>();
+
+                for (Object object : toList) {
+                    if (object instanceof OrderedJSONObject) {
+                        fixed.add(Serializer.deserialize((OrderedJSONObject) object));
+                    } else {
+                        fixed.add(object);
+                    }
+                }
+
+                deserialized.add(fixed);
+
+                continue;
+            }
+
+            if (v instanceof OrderedJSONObject || v instanceof JSONObject) {
+                OrderedJSONObject jsonObject = new OrderedJSONObject(new JSONObject(v + ""));
+
+                JSONObject clone = new JSONObject(jsonObject.toString());
+
+                if (clone.keys().hasNext()) {
+                    String n = clone.keys().next();
+
+                    try {
+                        clone.getJSONObject(n);
+                    } catch (Exception e) {
+                        deserialized.add(v);
+                        continue;
+                    }
+                }
+
+                Serializable s = Serializer.deserialize(jsonObject);
+
+                deserialized.add(s);
+                continue;
+            }
+
+            deserialized.add(v);
+        }
+
+        List<Object> objects = new ArrayList<>();
+
+        for (int i = 0; i < classes.size(); i++) {
+            if (i + 1 >= deserialized.size()) {
+                objects.add(null);
+            } else {
+                objects.add(deserialized.get(i));
+            }
+        }
+
+        Object[] asArray = objects.toArray(new Object[objects.size()]);
+
+        for (Object o : asArray) {
+            System.out.println(o);
+        }
+
+
+        serializable = (Serializable) constructor.newInstance(asArray);
         Serializable.Data d = new Serializable.Data();
         d.setId(id);
         serializable.data.getData().put(serializable, d);
 
         return serializable;
-    }
+    } */
 
     public interface SerializerResult {
         void result(List<Serializable> r);

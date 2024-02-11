@@ -14,6 +14,10 @@ public class OrderedJSONObject extends JSONObject {
 
     public OrderedJSONObject(JSONObject jsonObject) {
         this.jsonObject = jsonObject;
+
+        for (String key : jsonObject.keySet()) {
+            put(key, jsonObject.get(key));
+        }
     }
 
     @Override

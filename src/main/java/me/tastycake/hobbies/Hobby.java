@@ -13,6 +13,9 @@ public class Hobby implements Serializable {
 
     @Override
     public SortedMap serialize() {
-        return SortedMap.autoCreate(this);
+        return new SortedMap() {{
+            put("hobby", hobby);
+            put("likeIt", likeIt);
+        }};
     }
 }

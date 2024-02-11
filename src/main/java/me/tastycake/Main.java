@@ -92,11 +92,11 @@ public class Main {
 
         String id = UUID.randomUUID().toString();
 
-        // JSONObject main = Serializer.serializeAndSave(id, "", user1);
+        // JSONObject main = Serializer.serializeAndSave("mail", user1.getMail(), "",  user1);
 
         try {
-            Serializable serializable = Serializer.deserialize("mail", user1.getMail(), Pupil.class);
-            System.out.println(serializable);
+            Pupil deserialized = (Pupil) Serializer.deserialize("mail", user1.getMail(), Pupil.class);
+            System.out.println(deserialized);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

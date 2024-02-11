@@ -39,6 +39,11 @@ public class School implements Serializable {
 
     @Override
     public SortedMap serialize() {
-        return SortedMap.autoCreate(this);
+        return new SortedMap() {{
+            put("schoolFloors", schoolFloors);
+            put("schoolAdmin", schoolAdmin);
+            put("defTimeToFinishActivity", defTimeToFinishActivity);
+            put("pointsPerActivity", pointsPerActivity);
+        }};
     }
 }

@@ -1,5 +1,6 @@
 package me.tastycake.calendar;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import me.tastycake.serializer.Serializable;
@@ -10,6 +11,7 @@ import java.util.*;
 
 @Getter
 @Setter
+@AllArgsConstructor
 public class PupilCalendar implements Serializable {
     private Date requestedDate;
     private List<Activity> activities = new ArrayList<>();
@@ -46,10 +48,9 @@ public class PupilCalendar implements Serializable {
     @Override
     public SortedMap serialize() {
         return new SortedMap() {{
-            put("requestedDate", requestedDate);
-            put("activities", activities);
-            put("pupil", pupil);
-            put("dateActivities", dateActivities);
+            put("table", "pupilCalendar");
+            put("primaryId", "pupilName");
+            put("id", pupil.getName());
         }};
     }
 }

@@ -13,6 +13,9 @@ public class Food implements Serializable {
 
     @Override
     public SortedMap serialize() {
-        return SortedMap.autoCreate(this);
+        return new SortedMap() {{
+            put("food", food);
+            put("likeIt", likeIt);
+        }};
     }
 }
