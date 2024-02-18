@@ -1,0 +1,48 @@
+package me.tastycake.hackathon_2.user;
+
+import lombok.*;
+import me.tastycake.hackathon_2.user.imple.SchoolAdmin;
+import me.tastycake.hackathon_2.user.school.SchoolFloor;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class School implements Serializable {
+    private List<SchoolFloor> schoolFloors = new ArrayList<>();
+    private SchoolAdmin schoolAdmin;
+
+    @NonNull
+    private int defTimeToFinishActivity = 7;
+    @NonNull
+    private int pointsPerActivity = 5;
+
+    public School(int defTimeToFinishActivity, int pointsPerActivity) {
+        this.defTimeToFinishActivity = defTimeToFinishActivity;
+        this.pointsPerActivity = pointsPerActivity;
+    }
+
+    public int getTotalPoint() {
+        int totalPoints = 0;
+
+        for (SchoolFloor schoolFloor : schoolFloors) {
+            totalPoints += schoolFloor.getTotalPoints();
+        }
+
+        return totalPoints;
+    }
+
+//    @Override
+//    public SortedMap serialize() {
+//        return new SortedMap() {{
+//            put("schoolFloors", schoolFloors);
+//            put("schoolAdmin", schoolAdmin);
+//            put("defTimeToFinishActivity", defTimeToFinishActivity);
+//            put("pointsPerActivity", pointsPerActivity);
+//        }};
+//    }
+}
