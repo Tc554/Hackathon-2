@@ -5,6 +5,7 @@ import me.tastycake.hackathon_2.chatgpt.imple.GPT;
 import me.tastycake.hackathon_2.hobbies.Food;
 import me.tastycake.hackathon_2.hobbies.Hobby;
 import me.tastycake.hackathon_2.mysql.MySQL;
+import me.tastycake.hackathon_2.serializer.Serializer;
 import me.tastycake.hackathon_2.suggestion.Suggestion;
 import me.tastycake.hackathon_2.user.School;
 import me.tastycake.hackathon_2.user.User;
@@ -13,6 +14,7 @@ import me.tastycake.hackathon_2.user.imple.Teacher;
 import me.tastycake.hackathon_2.user.school.SchoolClass;
 import me.tastycake.hackathon_2.user.school.SchoolFloor;
 
+import java.sql.SQLType;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -73,6 +75,7 @@ public class Main {
         Teacher teacher = new Teacher("mora", "mora@gmail.com", "mora123", schoolClass, new ArrayList<>());
 
         schoolClass.setTeacher(teacher);
+        schoolClass.setId(UUID.randomUUID().toString());
 
         Pupil user1 = new Pupil("עמית", "amit@gmail.com", "test123", new ArrayList<>() {{
             add(new Hobby("כדורגל", true));
@@ -97,8 +100,13 @@ public class Main {
             // byte[] s = Serializer.byteSerialize(user1);
             // mySQL.saveToKey("mail", user1.getMail(), s);
 
-            User deserialized = (User) mySQL.getById("mail", user1.getMail(), "user_data");
-            System.out.println(deserialized instanceof Pupil);
+            // byte[] s = Serializer.byteSerialize(schoolClass);
+            // mySQL.saveToKey("class_data", "id", schoolClass.getId(), s);
+
+            // User deserialized = (User) mySQL.getById("mail", "tomer@gmail.com", "user_data");
+            System.out.println(user1.getPassword());
+            Pupil p = (Pupil) Serializer.byteDeserialize(Serializer.byteSerialize(user1));
+            System.out.println("Clone password: " + p.getPassword());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

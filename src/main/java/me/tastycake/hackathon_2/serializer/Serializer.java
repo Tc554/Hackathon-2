@@ -3,7 +3,6 @@ package me.tastycake.hackathon_2.serializer;
 import java.io.*;
 
 public class Serializer {
-
     public static byte[] byteSerialize(Object serializable) throws Exception {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
              ObjectOutputStream oos = new ObjectOutputStream(bos)) {

@@ -4,9 +4,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import me.tastycake.hackathon_2.user.school.SchoolClass;
 
+import java.io.Serializable;
+
 @Getter
 @NoArgsConstructor
-public class User {
+public class User implements Serializable {
     private String name;
     private String mail;
     private String password;

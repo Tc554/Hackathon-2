@@ -23,20 +23,20 @@ public class MySQL {
         return DriverManager.getConnection(url, username, password);
     }
 
-    public void saveToKey(String primaryId, String id, byte[] bytes) {
+    public void saveToKey(String table, String primaryId, String id, byte[] bytes) {
         try {
-            if (keyExists(primaryId, id)) {
-                updateKey(primaryId, id, bytes);
+            if (keyExists(table, primaryId, id)) {
+                updateKey(table, primaryId, id, bytes);
             } else {
-                insertValue(primaryId, id, bytes);
+                insertValue(table, primaryId, id, bytes);
             }
         } catch (Exception e) {
             handleError(e);
         }
     }
 
-    public boolean keyExists(String primaryId, String id) throws SQLException {
-        String sql = "SELECT * FROM user_data WHERE " + primaryId + " = ?";
+    public boolean keyExists(String table, String primaryId, String id) throws SQLException {
+        String sql = "SELECT * FROM " + table + " WHERE " + primaryId + " = ?";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, id);
 
@@ -46,8 +46,8 @@ public class MySQL {
         }
     }
 
-    private void updateKey(String primaryId, String id, Object object) throws SQLException {
-        String sql = "UPDATE user_data SET data = ? WHERE " + primaryId + " = ?";
+    private void updateKey(String table, String primaryId, String id, Object object) throws SQLException {
+        String sql = "UPDATE " + table + " SET data = ? WHERE " + primaryId + " = ?";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             // statement.setString(1, key);
             statement.setObject(1, object);
@@ -60,10 +60,10 @@ public class MySQL {
         }
     }
 
-    private void insertValue(String primaryId, String id, byte[] bytes) throws Exception {
+    private void insertValue(String table, String primaryId, String id, byte[] bytes) throws Exception {
         Object d = Serializer.byteDeserialize(bytes);
 
-        String sql = "INSERT INTO user_data(" + primaryId + ", data) VALUES (?, ?)";
+        String sql = "INSERT INTO " + table + "(" + primaryId + ", data) VALUES (?, ?)";
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, id);

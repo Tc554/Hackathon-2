@@ -22,6 +22,7 @@ public class SchoolClass implements Serializable {
     private SchoolFloor schoolFloor;
     private Teacher teacher;
     private String teacherMail;
+    private String id;
 
     public int getTotalScore() {
         int totalScore = 0;
