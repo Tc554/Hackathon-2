@@ -8,7 +8,7 @@ import me.tastycake.hackathon_2.suggestion.Suggestion;
 import me.tastycake.hackathon_2.user.imple.Pupil;
 
 public class GPT {
-    private GPTAPI gpt = new GPTAPI("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", GPTAPI.Model.gpt_3_5_turbo_0613);
+    private GPTAPI gpt = new GPTAPI("", GPTAPI.Model.gpt_3_5_turbo_0613);
     private ResultListener resultListener;
 
     public GPT(ResultListener resultListener) {
